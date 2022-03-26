@@ -10,10 +10,7 @@ import requests
 # might be used in db_session, commented at the moment
 
 from data.post import Post
-from data.reports import Reports
 from data.users import User
-from data.stash import Stash
-from data.public import Public
 from forms.RegisterForm import RegisterForm
 from forms.LoginForm import LoginForm
 from forms.AddingForm import AddingForm
@@ -96,7 +93,7 @@ def add_new():
         )
         db_sess.add(post)
         db_sess.commit()
-        redirect('')
+        return redirect('/created')
 
     return render_template('Adder.html', title='Добавить новость', form=form)
 
