@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>WIP</h1>
+
+{% if current_user.is_authenticated %}
+<a class="btn btn-primary " href="/add_new">Adder</a>
+{% endif %}
+
+<p text>
+    The text
+</p>
+
+
+{% endblock %}

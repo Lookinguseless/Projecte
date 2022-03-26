@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if current_user.is_authenticated %}
+    <h1>Добавление</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.title.label }}<br>
+            <br>
+            {{ form.title(class="form-control") }}<br>
+            {% for error in form.title.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+        </p>
+
+        <p>
+            {{ form.content.label }}<br>
+            <br>
+            {{ form.content(class="form-control") }}<br>
+            {% for error in form.content.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+        </p>
+
+        <p>
+            {{ form.comments.label }}<br>
+            <br>
+            {{ form.comments(class="checkbox") }}<br>
+            {% for error in form.comments.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+        </p>
+
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        {{message}}
+    </form>
+{% else %}
+<H1>You have to be authorized</H1>
+{% endif %}
+{% endblock %}
