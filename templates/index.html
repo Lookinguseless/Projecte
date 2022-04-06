@@ -8,7 +8,14 @@
 {% endif %}
 
 <p text>
-    The text
+    {% for dataobject in datalist %}
+        <p>
+        {% print(dataobject.title) %}
+        <br>
+        {% print(dataobject.content) %}
+        <br>
+        </p>
+    {% endfor %}
 </p>
 
 

@@ -27,7 +27,13 @@ db_session.global_init("db/data.db")
 @app.route('/index')
 @app.route('/')
 def index():
-    return render_template('index.html')
+    db_sess = db_session.create_session()
+    dbdata = db_sess.query(Post).all()
+    datalist = []
+    for j in dbdata:
+        dataobj = {"title": j.title, "content": j.content, "comments": j.comments}
+        datalist.append(dataobj)
+    return render_template('index.html', datalist=datalist)
 
 
 @app.route('/register', methods=['GET', 'POST'])
