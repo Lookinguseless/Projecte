@@ -7,5 +7,5 @@ from wtforms.validators import DataRequired
 class AddingForm(FlaskForm):
     title = StringField('Заголовок', validators=[DataRequired()])
     content = StringField('Текст', validators=[DataRequired()])
-    comments = BooleanField('Разрешить комментирование', default=True)
+    commentable = BooleanField('Разрешить комментирование', default=True)
     submit = SubmitField('Создать')

@@ -1,7 +1,7 @@
 from flask import Flask, redirect, jsonify, request
 from flask import render_template
 from data import db_session
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized, current_user
 # from werkzeug import secure_filename
 import os
 import random
@@ -11,6 +11,7 @@ import requests
 
 from data.post import Post
 from data.users import User
+from data.comments import Comments
 from forms.RegisterForm import RegisterForm
 from forms.LoginForm import LoginForm
 from forms.AddingForm import AddingForm
@@ -30,10 +31,17 @@ def index():
     db_sess = db_session.create_session()
     dbdata = db_sess.query(Post).all()
     datalist = []
+    commentlist = []
     for j in dbdata:
-        dataobj = {"title": j.title, "content": j.content, "comments": j.comments}
+        id = j.id
+        dataobj = {"title": j.title, "content": j.content, "commentable": j.commentable,
+                   "author": db_sess.query(User).filter(User.id == j.author).first().name}
         datalist.append(dataobj)
-    return render_template('index.html', datalist=datalist)
+        dbcomdata = db_sess.query(Comments).filter(Comments.parent == id).all()
+        for d in dbcomdata:
+            commentlist = {"author": d.author, "content": d.content}
+
+    return render_template('index.html', datalist=datalist, commentobject=commentlist)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -95,13 +103,21 @@ def add_new():
         post = Post(
             title=form.title.data,
             content=form.content.data,
-            comments=form.comments.data
+            commentable=form.commentable.data,
+            author=current_user.id
         )
         db_sess.add(post)
         db_sess.commit()
         return redirect('/created')
 
     return render_template('Adder.html', title='Добавить новость', form=form)
+
+
+@app.route('/check')
+def check():
+    db_sess = db_session.create_session()
+    print(current_user.id)
+    return 'check'
 
 
 @login_manager.user_loader

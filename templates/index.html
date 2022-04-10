@@ -7,14 +7,40 @@
 <a class="btn btn-primary " href="/add_new">Adder</a>
 {% endif %}
 
-<p text>
+    <div class="d-flex" style="height: 200px;">
+    <div class="vr"></div>
+    </div>
+
+<h1>Posts:</h1>
+
+<p>
     {% for dataobject in datalist %}
-        <p>
-        {% print(dataobject.title) %}
-        <br>
-        {% print(dataobject.content) %}
-        <br>
+        <h2>{{ dataobject.title }}</h2>
+        <p class="lead">
+            {{dataobject.content}}
         </p>
+        <h5>{{dataobject.author}}</h5>
+
+        <div class="d-flex" style="height: 10px;">
+        <div class="vr"></div>
+
+        </div>
+        <button type="button" class="btn btn-success">Comment</button>
+
+        <br>
+        <h5>comments:</h5>
+
+        {% for comment in commentobject %}
+        <p class="fs-5 col-md-8">
+           {{ comment }}
+        </p>
+        {% endfor %}
+
+        <div class="d-flex" style="height: 100px;">
+        <div class="vr"></div>
+        </div>
+
+
     {% endfor %}
 </p>
 

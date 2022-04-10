@@ -30,10 +30,10 @@
         </p>
 
         <p>
-            {{ form.comments.label }}<br>
+            {{ form.commentable.label }}<br>
             <br>
-            {{ form.comments(class="checkbox") }}<br>
-            {% for error in form.comments.errors %}
+            {{ form.commentable(class="checkbox") }}<br>
+            {% for error in form.commentable.errors %}
         <p class="alert alert-danger" role="alert">
             {{ error }}
         </p>
