@@ -34,14 +34,16 @@ def index():
     commentlist = []
     for j in dbdata:
         id = j.id
-        dataobj = {"title": j.title, "content": j.content, "commentable": j.commentable,
+        dataobj = {"id": id, "title": j.title, "content": j.content, "commentable": j.commentable,
                    "author": db_sess.query(User).filter(User.id == j.author).first().name}
-        datalist.append(dataobj)
         dbcomdata = db_sess.query(Comments).filter(Comments.parent == id).all()
-        for d in dbcomdata:
-            commentlist = {"author": d.author, "content": d.content}
+        for i in dbcomdata:
+            commentlist.append({"author": i.author, "content": i.content})
+        dataobj['comments'] = commentlist
+        datalist.append(dataobj)
+        commentlist = []
 
-    return render_template('index.html', datalist=datalist, commentobject=commentlist)
+    return render_template('index.html', datalist=datalist)
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
+<!-- Do not use btn btn-secondary, cause it's used in collapse script  -->
+
 {% block content %}
+<style>
+.content {display: none}
+</style>
+
+
 <h1>WIP</h1>
 
 {% if current_user.is_authenticated %}
@@ -28,13 +35,20 @@
         <button type="button" class="btn btn-success">Comment</button>
 
         <br>
-        <h5>comments:</h5>
+        <button type="button" class="btn btn-secondary">Open Collapsible</button>
+        <div class="content">
+            {% for comment in dataobject.comments %}
+            <p class="fs-5 col-md-8">
+                {% if comment %}
+                    {{ comment.author }} : {{ comment.content }}
+                {% endif %}
+            </p>
+            {% endfor %}
 
-        {% for comment in commentobject %}
-        <p class="fs-5 col-md-8">
-           {{ comment }}
-        </p>
-        {% endfor %}
+        </div>
+
+
+
 
         <div class="d-flex" style="height: 100px;">
         <div class="vr"></div>
@@ -42,7 +56,22 @@
 
 
     {% endfor %}
-</p>
 
+<script>
+var coll = document.getElementsByClassName("btn btn-secondary");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
 
 {% endblock %}
