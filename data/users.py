@@ -15,6 +15,7 @@ class User(SqlAlchemyBase, UserMixin):
                               index=True, unique=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     post = relation('Post', back_populates='user')
+    access_level = sqlalchemy.Column(sqlalchemy.Integer)
 
 
     def set_password(self, password):

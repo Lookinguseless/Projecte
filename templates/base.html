@@ -16,10 +16,14 @@
     <p/>
         <a class="btn btn-primary " href="/">На главную</a>
         <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+
+        {% if current_user.access_level > 1 %}
+        <a class="btn btn-danger" href="/level_management">Администрирование</a>
+        {% endif %}
         </p>
 
 
-{% else %}
+        {% else %}
     <p/>
         <a class="btn btn-primary " href="/">На главную</a>
         <a class="btn btn-primary " href="/register">Зарегистрироваться</a>

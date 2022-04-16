@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Access management</h1>
+<br>
+
+Имя &emsp; Эл. почта &emsp; Роль
+
+    <div class="d-flex" style="height: 40px;">
+    <div class="vr"></div>
+    </div>
+
+{% for j in userlist %}
+    <p>
+    {% if j.id != current_user.id %}
+
+        {{ j.name}} &emsp; {{j.email }} &emsp; {{access_levels[j.access_level]}} <br>
+
+        {% if j.access_level < leng %}
+        <a class="btn btn-warning" href="/level_ch/up/{{j.id}}">Повысить уровень</a>
+        {% endif %}
+
+        {% if j.access_level > 0 %}
+        <a class="btn btn-secondary" href="/level_ch/down/{{j.id}}">Понизить уровень</a>
+        {% endif %}
+
+        <div class="d-flex" style="height: 10px;">
+        <div class="vr"></div>
+        </div>
+    </p>
+
+    {% endif %}
+{% endfor %}
+
+{% endblock %}

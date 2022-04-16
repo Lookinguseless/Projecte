@@ -1,7 +1,8 @@
 from flask import Flask, redirect, jsonify, request
 from flask import render_template
 from data import db_session
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized, \
+    current_user
 # from werkzeug import secure_filename
 import os
 import random
@@ -23,6 +24,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 db_session.global_init("db/data.db")
+
+access_levels = ['Ученик', 'Учитель', 'Администратор']
 
 
 @app.route('/index')
@@ -62,6 +65,7 @@ def reqister():
         user = User(
             name=form.name.data,
             email=form.email.data,
+            access_level=2
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -91,6 +95,7 @@ def logout():
     logout_user()
     return redirect("/")
 
+
 @app.route('/created', methods=['GET'])
 def created():
     return render_template('created.html', title='Готово')
@@ -115,17 +120,51 @@ def add_new():
     return render_template('Adder.html', title='Добавить новость', form=form)
 
 
-@app.route('/check')
-def check():
-    db_sess = db_session.create_session()
-    print(current_user.id)
-    return 'check'
-
-
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
+
+
+@app.route('/level_management')
+def level_management():
+    db_sess = db_session.create_session()
+    if db_sess.query(User).filter(User.id == current_user.id).first().access_level > 1:
+
+        # access_levels
+
+        users = db_sess.query(User).all()
+        userlist = []
+        for j in users:
+            data = {'access_level': j.access_level, 'email': j.email,
+                        'name': j.name, 'id': j.id}
+            userlist.append(data)
+        return render_template('admin.html', userlist=userlist, access_levels=access_levels, leng=len(access_levels) - 1)
+    else:
+        return 'Нет доступа'
+
+
+@app.route('/level_ch/<type>/<id>')
+def level_ch(type, id):
+    db_sess = db_session.create_session()
+
+    if current_user.id == id:
+        return 'Нет доступа'
+
+    if db_sess.query(User).filter(User.id == current_user.id).first().access_level > 1:
+        affected_user = db_sess.query(User).filter(User.id == id).first()
+        if type == 'up':
+            if affected_user.access_level < len(access_levels) - 1:
+                affected_user.access_level += 1
+        elif type == 'down':
+           if affected_user.access_level > 0:
+               affected_user.access_level -= 1
+        else:
+            return 'Ошибка'
+        db_sess.commit()
+        data = {'access_level': affected_user.access_level, 'email': affected_user.email,
+                        'name': affected_user.name}
+        return render_template('user up.html', data=data, access_levels=access_levels)
 
 
 if __name__ == '__main__':
