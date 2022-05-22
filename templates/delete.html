@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h5>Удаление</h5>
+    <p>
+        {{content}}
+    </p>
+
+<a class="btn btn-success " href="/remove/{{post_id}}">Удалить запись</a>
+<a class="btn btn-success" href="/">На главную</a>
+{% endblock %}

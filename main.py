@@ -16,6 +16,7 @@ from data.comments import Comments
 from forms.RegisterForm import RegisterForm
 from forms.LoginForm import LoginForm
 from forms.AddingForm import AddingForm
+from forms.CommentingForm import CommentingForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'rigeldev_secret_key'
@@ -41,7 +42,8 @@ def index():
                    "author": db_sess.query(User).filter(User.id == j.author).first().name}
         dbcomdata = db_sess.query(Comments).filter(Comments.parent == id).all()
         for i in dbcomdata:
-            commentlist.append({"author": i.author, "content": i.content})
+            commentlist.append({"author": db_sess.query(User).filter(User.id == i.author).first().name,
+                                "content": i.content, "id": i.id})
         dataobj['comments'] = commentlist
         datalist.append(dataobj)
         commentlist = []
@@ -65,7 +67,7 @@ def reqister():
         user = User(
             name=form.name.data,
             email=form.email.data,
-            access_level=2
+            access_level=0
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -99,6 +101,11 @@ def logout():
 @app.route('/created', methods=['GET'])
 def created():
     return render_template('created.html', title='Готово')
+
+
+@app.route('/deleted', methods=['GET'])
+def deleted():
+    return render_template('deleted.html', title='Готово')
 
 
 @login_required
@@ -137,13 +144,15 @@ def level_management():
         userlist = []
         for j in users:
             data = {'access_level': j.access_level, 'email': j.email,
-                        'name': j.name, 'id': j.id}
+                    'name': j.name, 'id': j.id}
             userlist.append(data)
-        return render_template('admin.html', userlist=userlist, access_levels=access_levels, leng=len(access_levels) - 1)
+        return render_template('admin.html', userlist=userlist, access_levels=access_levels,
+                               leng=len(access_levels) - 1)
     else:
         return 'Нет доступа'
 
 
+@login_required
 @app.route('/level_ch/<type>/<id>')
 def level_ch(type, id):
     db_sess = db_session.create_session()
@@ -157,14 +166,65 @@ def level_ch(type, id):
             if affected_user.access_level < len(access_levels) - 1:
                 affected_user.access_level += 1
         elif type == 'down':
-           if affected_user.access_level > 0:
-               affected_user.access_level -= 1
+            if affected_user.access_level > 0:
+                affected_user.access_level -= 1
         else:
             return 'Ошибка'
         db_sess.commit()
         data = {'access_level': affected_user.access_level, 'email': affected_user.email,
-                        'name': affected_user.name}
+                'name': affected_user.name}
         return render_template('user up.html', data=data, access_levels=access_levels)
+
+
+@login_required
+@app.route('/add_comment/<post_id>', methods=['GET', 'POST'])
+def add_comment(post_id):
+    form = CommentingForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        comment = Comments(
+            content=form.content.data,
+            parent=post_id,
+            author=current_user.id
+        )
+        db_sess.add(comment)
+        db_sess.commit()
+        return redirect('/created')
+
+    return render_template('addComment.html', title='Комментирование', form=form)
+
+
+@login_required
+@app.route('/delete/<post_id>', methods=['GET', 'POST'])
+def delete(post_id):
+    db_sess = db_session.create_session()
+
+    content = db_sess.query(Post).filter(Post.id == post_id).first().content
+
+    return render_template('delete.html', content=content, post_id=post_id)
+
+
+@login_required
+@app.route('/remove/<post_id>', methods=['GET', 'POST'])
+def remove(post_id):
+    if current_user.access_level > 1:
+        db_sess = db_session.create_session()
+        db_sess.query(Post).filter(Post.id == post_id).delete()
+        db_sess.query(Comments).filter(Comments.parent == post_id).delete()
+        db_sess.commit()
+
+        return redirect('/deleted')
+
+
+@login_required
+@app.route('/remove_comm/<comment_id>', methods=['GET', 'POST'])
+def remove_comm(comment_id):
+    if current_user.access_level > 1:
+        db_sess = db_session.create_session()
+        db_sess.query(Comments).filter(Comments.id == comment_id).delete()
+        db_sess.commit()
+
+        return redirect('/deleted')
 
 
 if __name__ == '__main__':

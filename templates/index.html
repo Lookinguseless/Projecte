@@ -8,7 +8,7 @@
 </style>
 
 
-<h1>WIP</h1>
+<h1>Новостной сайт</h1>
 
 {% if current_user.is_authenticated and current_user.access_level > 0 %}
 <a class="btn btn-primary " href="/add_new">Добавить запись</a>
@@ -32,9 +32,13 @@
         <div class="vr"></div>
 
         </div>
-        <button type="button" class="btn btn-success">Комментировать</button>
+        <a class="btn btn-success " href="/add_comment/{{dataobject.id}}">Комментировать</a>
 
-        <br>
+        <div class="d-flex" style="height: 20px;">
+        <div class="vr"></div>
+        </div>
+
+
         <button type="button" class="btn btn-secondary">Показать комментарии</button>
         <div class="content">
             {% for comment in dataobject.comments %}
@@ -42,12 +46,23 @@
                 {% if comment %}
                     {{ comment.author }} : {{ comment.content }}
                 {% endif %}
+
+                {% if current_user.is_authenticated and current_user.access_level > 1 %}
+                    <a class="btn btn-danger " href="/remove_comm/{{comment.id}}">Удалить запись</a>
+                {% endif %}
             </p>
             {% endfor %}
 
+
         </div>
 
+        <div class="d-flex" style="height: 20px;">
+        <div class="vr"></div>
+        </div>
 
+        {% if current_user.is_authenticated and current_user.access_level > 1 %}
+            <a class="btn btn-danger " href="/delete/{{dataobject.id}}">Удалить запись</a>
+        {% endif %}
 
 
         <div class="d-flex" style="height: 100px;">
