@@ -28,51 +28,47 @@
         </p>
         <h5>{{dataobject.author}}</h5>
 
-        <div class="d-flex" style="height: 10px;">
+        <div class="d-flex" style="height: 60px;">
         <div class="vr"></div>
 
-        </div>
-        {% if current_user.is_authenticated%}
-        <a class="btn btn-success " href="/add_comment/{{dataobject.id}}">Комментировать</a>
+            <div>
+            {% if current_user.is_authenticated and current_user.access_level > 1 or current_user.is_authenticated and
+            current_user.id == dataobject.author_id %}
+                <a class="btn btn-danger " href="/delete/{{dataobject.id}}">Удалить запись</a>
+            {% endif %}
+            </div>
 
-        <div class="d-flex" style="height: 20px;">
-        <div class="vr"></div>
-        </div>
+        {% if dataobject.commentable%}
 
+            </div>
+            {% if current_user.is_authenticated%}
+            <a class="btn btn-success " href="/add_comment/{{dataobject.id}}">Комментировать</a>
+
+            <div class="d-flex" style="height: 20px;">
+            <div class="vr"></div>
+            </div>
+
+            {% endif %}
+
+            <button type="button" class="btn btn-secondary">Показать комментарии</button>
+            <div class="content">
+                {% for comment in dataobject.comments %}
+                <p class="fs-5 col-md-8">
+                    {% if comment %}
+                        {{ comment.author }} : {{ comment.content }}
+                    {% endif %}
+                    {% if current_user.is_authenticated and current_user.access_level > 1 or current_user.is_authenticated and
+                        current_user.id == comment.author_id %}
+                        <a class="btn btn-danger " href="/remove_comm/{{comment.id}}">Удалить запись</a>
+                    {% endif %}
+                </p>
+                {% endfor %}
+            </div>
         {% endif %}
-
-
-        <button type="button" class="btn btn-secondary">Показать комментарии</button>
-        <div class="content">
-            {% for comment in dataobject.comments %}
-            <p class="fs-5 col-md-8">
-                {% if comment %}
-                    {{ comment.author }} : {{ comment.content }}
-                {% endif %}
-
-                {% if current_user.is_authenticated and current_user.access_level > 1 %}
-                    <a class="btn btn-danger " href="/remove_comm/{{comment.id}}">Удалить запись</a>
-                {% endif %}
-            </p>
-            {% endfor %}
-
-
-        </div>
-
-        <div class="d-flex" style="height: 20px;">
-        <div class="vr"></div>
-        </div>
-
-        {% if current_user.is_authenticated and current_user.access_level > 1 %}
-            <a class="btn btn-danger " href="/delete/{{dataobject.id}}">Удалить запись</a>
-        {% endif %}
-
 
         <div class="d-flex" style="height: 100px;">
         <div class="vr"></div>
         </div>
-
-
     {% endfor %}
 
 <script>

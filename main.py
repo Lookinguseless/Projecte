@@ -34,16 +34,18 @@ access_levels = ['Ученик', 'Учитель', 'Администратор']
 def index():
     db_sess = db_session.create_session()
     dbdata = db_sess.query(Post).all()
+
     datalist = []
     commentlist = []
     for j in dbdata:
         id = j.id
+        authors = db_sess.query(User).filter(User.id == j.author).first()
         dataobj = {"id": id, "title": j.title, "content": j.content, "commentable": j.commentable,
-                   "author": db_sess.query(User).filter(User.id == j.author).first().name}
+                   "author": authors.name, "author_id": authors.id}
         dbcomdata = db_sess.query(Comments).filter(Comments.parent == id).all()
         for i in dbcomdata:
             commentlist.append({"author": db_sess.query(User).filter(User.id == i.author).first().name,
-                                "content": i.content, "id": i.id})
+                                "content": i.content, "id": i.id, "author_id":db_sess.query(User).filter(User.id == i.author).first().id })
         dataobj['comments'] = commentlist
         datalist.append(dataobj)
         commentlist = []
@@ -111,20 +113,23 @@ def deleted():
 @login_required
 @app.route('/add_new', methods=['GET', 'POST'])
 def add_new():
-    form = AddingForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        post = Post(
-            title=form.title.data,
-            content=form.content.data,
-            commentable=form.commentable.data,
-            author=current_user.id
-        )
-        db_sess.add(post)
-        db_sess.commit()
-        return redirect('/created')
+    if current_user.access_level > 0:
+        form = AddingForm()
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            post = Post(
+                title=form.title.data,
+                content=form.content.data,
+                commentable=form.commentable.data,
+                author=current_user.id
+            )
+            db_sess.add(post)
+            db_sess.commit()
+            return redirect('/created')
 
-    return render_template('Adder.html', title='Добавить новость', form=form)
+        return render_template('Adder.html', title='Добавить новость', form=form)
+    else:
+        return 'access error'
 
 
 @login_manager.user_loader
@@ -171,6 +176,7 @@ def level_ch(type, id):
         else:
             return 'Ошибка'
         db_sess.commit()
+        print('why')
         data = {'access_level': affected_user.access_level, 'email': affected_user.email,
                 'name': affected_user.name}
         return render_template('user up.html', data=data, access_levels=access_levels)
@@ -198,20 +204,22 @@ def add_comment(post_id):
 @app.route('/delete/<post_id>', methods=['GET', 'POST'])
 def delete(post_id):
     db_sess = db_session.create_session()
+    if current_user.access_level > 1 or db_sess.query(Post).filter(Post.author == current_user.id):
+        content = db_sess.query(Post).filter(Post.id == post_id).first().content
 
-    content = db_sess.query(Post).filter(Post.id == post_id).first().content
-
-    return render_template('delete.html', content=content, post_id=post_id)
+        return render_template('delete.html', content=content, post_id=post_id)
+    else:
+        return 'access error'
 
 
 @login_required
 @app.route('/remove/<post_id>', methods=['GET', 'POST'])
 def remove(post_id):
-    if current_user.access_level > 1:
         db_sess = db_session.create_session()
-        db_sess.query(Post).filter(Post.id == post_id).delete()
-        db_sess.query(Comments).filter(Comments.parent == post_id).delete()
-        db_sess.commit()
+        if current_user.access_level > 1 or db_sess.query(Post).filter(Post.author == current_user.id):
+            db_sess.query(Post).filter(Post.id == post_id).delete()
+            db_sess.query(Comments).filter(Comments.parent == post_id).delete()
+            db_sess.commit()
 
         return redirect('/deleted')
 
